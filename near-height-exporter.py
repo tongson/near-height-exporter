@@ -5,6 +5,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 import prometheus_client
+from prometheus_client import REGISTRY
 
 def read_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Exporter of external Near block height.")
@@ -43,6 +44,8 @@ def get_height(url: str) -> float:
     
 if __name__ == '__main__':
     args = read_args()
+    for coll in list(REGISTRY._collector_to_names.keys()):
+        REGISTRY.unregister(coll)
     prometheus_client.start_http_server(args.port)
     while True:
         height = get_height(args.url)
