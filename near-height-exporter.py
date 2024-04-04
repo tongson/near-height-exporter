@@ -52,6 +52,6 @@ if __name__ == '__main__':
         if height > 1:
             register = prometheus_client.Gauge('near_latest_block_height',
                                                'Near Latest Block Height',
-                                               ['remote_api'])
+                                               ['external_url'])
             register.labels(urlparse(args.url).hostname).set(height)
         time.sleep(args.freq)
