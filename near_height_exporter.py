@@ -72,7 +72,7 @@ if __name__ == "__main__":
         register = prometheus_client.Gauge(
             "near_latest_block_height",
             "Near Latest Block Height",
-            ["external_api"],
+            ["external_endpoint"],
         )
         while True:
             height = get_height(args.url)
