@@ -29,7 +29,7 @@ def read_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--freq",
-        metavar="FREQ",
+        metavar="SEC",
         type=int,
         default=300,
         help="Update frequency in seconds. Default is 300 seconds (5 minutes).",
