@@ -34,24 +34,34 @@ def get_height(url: str) -> float:
     adapter = HTTPAdapter(max_retries=retry_strategy)
     session = requests.Session()
     session.mount('https://', adapter)
-    resp = session.get(url)
-    if resp.status_code == 200:
-        data = resp.json()
-        height = data["blocks"][0]["block_height"]
-        return float(height)
+    try:
+        resp = session.get(url)
+    except Exception as e:
+        e.add_note("\nError fetching URL.")
+        raise
     else:
-        return float(0)
-    
+        if resp.status_code == 200:
+            data = resp.json()
+            height = data["blocks"][0]["block_height"]
+            return float(height)
+        else:
+            return float(0)
+        
 if __name__ == '__main__':
     args = read_args()
     for coll in list(REGISTRY._collector_to_names.keys()):
         REGISTRY.unregister(coll)
-    prometheus_client.start_http_server(args.port)
-    while True:
-        height = get_height(args.url)
-        if height > 1:
-            register = prometheus_client.Gauge('near_latest_block_height',
-                                               'Near Latest Block Height',
-                                               ['external_api'])
-            register.labels(urlparse(args.url).hostname).set(height)
-        time.sleep(args.freq)
+    try:
+        prometheus_client.start_http_server(args.port)
+    except Exception as e:
+        e.add_note("\nError starting HTTP server.")
+        raise
+    else:
+        while True:
+            height = get_height(args.url)
+            if height > 1:
+                register = prometheus_client.Gauge('near_latest_block_height',
+                                                   'Near Latest Block Height',
+                                                   ['external_api'])
+                register.labels(urlparse(args.url).hostname).set(height)
+            time.sleep(args.freq)
