@@ -69,14 +69,14 @@ if __name__ == "__main__":
         e.add_note("\nError starting HTTP server.")
         raise
     else:
-        while True:
-            height = get_height(args.url)
-            sys.stdout.write(str(height) + "\n")
-            if height > 1:
-                register = prometheus_client.Gauge(
+        register = prometheus_client.Gauge(
                     "near_latest_block_height",
                     "Near Latest Block Height",
                     ["external_api"],
                 )
+        while True:
+            height = get_height(args.url)
+            sys.stdout.write(str(height) + "\n")
+            if height > 1:
                 register.labels(urlparse(args.url).hostname).set(height)
             time.sleep(args.freq)
