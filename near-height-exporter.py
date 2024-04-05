@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 import time
 import argparse
+import sys
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
@@ -59,6 +60,7 @@ if __name__ == '__main__':
     else:
         while True:
             height = get_height(args.url)
+            sys.stdout.write(str(height) + '\n')
             if height > 1:
                 register = prometheus_client.Gauge('near_latest_block_height',
                                                    'Near Latest Block Height',
