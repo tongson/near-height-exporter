@@ -8,24 +8,34 @@ from urllib3.util import Retry
 import prometheus_client
 from prometheus_client import REGISTRY
 
+
 def read_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Exporter of external Near block height.")
-    parser.add_argument("--port",
-                        metavar="PORT",
-                        type=int,
-                        default=9099,
-                        help="The port used to export the metrics. Default is 9099.")
-    parser.add_argument("--url",
-                        metavar="URL",
-                        default=False,
-                        type=str,
-                        help="URL of Near API endpoint.")
-    parser.add_argument("--freq",
-                        metavar="FREQ",
-                        type=int,
-                        default=300,
-                        help="Update frequency in seconds. Default is 300 seconds (5 minutes).")
+    parser = argparse.ArgumentParser(
+        description="Exporter of external Near block height."
+    )
+    parser.add_argument(
+        "--port",
+        metavar="PORT",
+        type=int,
+        default=9099,
+        help="The port used to export the metrics. Default is 9099.",
+    )
+    parser.add_argument(
+        "--url",
+        metavar="URL",
+        default=False,
+        type=str,
+        help="URL of Near API endpoint.",
+    )
+    parser.add_argument(
+        "--freq",
+        metavar="FREQ",
+        type=int,
+        default=300,
+        help="Update frequency in seconds. Default is 300 seconds (5 minutes).",
+    )
     return parser.parse_args()
+
 
 def get_height(url: str) -> float:
     retry_strategy = Retry(
@@ -34,7 +44,7 @@ def get_height(url: str) -> float:
     )
     adapter = HTTPAdapter(max_retries=retry_strategy)
     session = requests.Session()
-    session.mount('https://', adapter)
+    session.mount("https://", adapter)
     try:
         resp = session.get(url)
     except Exception as e:
@@ -47,8 +57,9 @@ def get_height(url: str) -> float:
             return float(height)
         else:
             return float(0)
-        
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     args = read_args()
     for coll in list(REGISTRY._collector_to_names.keys()):
         REGISTRY.unregister(coll)
@@ -60,10 +71,12 @@ if __name__ == '__main__':
     else:
         while True:
             height = get_height(args.url)
-            sys.stdout.write(str(height) + '\n')
+            sys.stdout.write(str(height) + "\n")
             if height > 1:
-                register = prometheus_client.Gauge('near_latest_block_height',
-                                                   'Near Latest Block Height',
-                                                   ['external_api'])
+                register = prometheus_client.Gauge(
+                    "near_latest_block_height",
+                    "Near Latest Block Height",
+                    ["external_api"],
+                )
                 register.labels(urlparse(args.url).hostname).set(height)
             time.sleep(args.freq)
