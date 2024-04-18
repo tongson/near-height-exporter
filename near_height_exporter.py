@@ -46,14 +46,14 @@ def get_height(url: str) -> float:
     session = requests.Session()
     session.mount("https://", adapter)
     try:
-        resp = session.get(url)
+        resp = session.post(url, json={"jsonrpc": "2.0", "method": "status", "id": 1})
     except Exception as e:
         e.add_note("\nError fetching URL.")
         raise
     else:
         if resp.status_code == 200:
             data = resp.json()
-            height = data["blocks"][0]["block_height"]
+            height = data["result"]["sync_info"]["latest_block_height"]
             return float(height)
         else:
             return float(0)
